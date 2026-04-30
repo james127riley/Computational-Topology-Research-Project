@@ -24,13 +24,13 @@ class UMAP():
     def __init__(self,base_url, target_dimension, neighbours, epochs, min_dist, alpha0, points, resolution, bound):
         #print("Generating data")
         loop = self.generate_loop(3,points)
-        dpoints,labels = generate_datasets.make_point_clouds(1,int(math.sqrt(points)),0.1)
-        torus = np.array(dpoints[2])
-        print(torus.shape)
+        #dpoints,labels = generate_datasets.make_point_clouds(1,int(math.sqrt(points)),0.1)
+        #torus = np.array(dpoints[2])
+        #print(torus.shape)
         print(loop.shape)
         #points = 48
         #players = self.get_player_data(base_url)[:points]
-        data = torus
+        data = loop
         print(data.shape)
         size = data.shape[0]
         fs_set = self.process_matrix(data,neighbours,size,points)
@@ -42,15 +42,15 @@ class UMAP():
         #print("optimising")
         plots = np.array(self.optimise_embedding(LD_candidate[:],fs_set,min_dist,epochs,alpha0, resolution, bound, target_dimension))
         #print("plotting")
-        #self.calculate_homology(data)
-        #self.calculate_homology(LD_candidate2)
-        #self.calculate_homology(plots[-1])
-        #if target_dimension == 2:
-        #    self.plot_LD_2D(LD_final,"UMAP")
-        #elif target_dimension == 3:
-        #    self.plot_LD_3D(LD_final)
+        self.calculate_homology(data)
+        self.calculate_homology(LD_candidate2)
+        self.calculate_homology(plots[-1])
+        if target_dimension == 2:
+            self.plot_LD_2D(plots[-1],"UMAP")
+        elif target_dimension == 3:
+            self.plot_LD_3D(plots[-1],"UMAP")
         self.plot_all_322(data,LD_candidate,plots[-1])
-        self.plot_key_LD(LD_candidate,plots[-1])
+        #self.plot_key_LD(LD_candidate,plots[-1])
         self.plot_all_stages(LD_candidate,plots)
         self.LD = plots[-1].copy()
 
@@ -395,8 +395,9 @@ class UMAP():
             pos_diff = 0
             neg_diff = 0
             alts = []
-            for i in range(size):
-                for j in range(i,size):
+            direction = -1#+2*(e%2)
+            for i in range(0,size,direction):
+                for j in range(i,size,direction):
                     if A[i][j] == 0: continue
                     print(round(100*(e*size**2+i*size+j)/(epochs*size**2),2), end="\r")
                     r = random.random()
@@ -560,11 +561,11 @@ if __name__ =="__main__":
     if mode == 0:
         UMAP(base_url,
          target_dimension=2,
-         neighbours=30,
-         epochs=50,
+         neighbours=13,
+         epochs=100,
          min_dist=0.01,
          alpha0=1,
-         points=400,
+         points=48,
          resolution=50,
          bound=4)
     elif mode == 1:
